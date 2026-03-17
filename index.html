@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Musica - Premium Streaming</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff3366">
+    
+    <link rel="stylesheet" href="style.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+    
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
     <div class="app-container">
@@ -17,15 +22,15 @@
                 <h2>MUSICA</h2>
             </div>
             <div class="nav-items">
-                <button class="nav-item" data-tab="search" onclick="Musica.nav('search-view', this)">
+                <button class="nav-item" onclick="Musica.nav('search-view', this)">
                     <span class="material-symbols-rounded">search</span>
                     <span>Search</span>
                 </button>
-                <button class="nav-item active" data-tab="trending" onclick="Musica.nav('trending-view', this)">
+                <button class="nav-item active" onclick="Musica.nav('trending-view', this)">
                     <span class="material-symbols-rounded">local_fire_department</span>
                     <span>Trending</span>
                 </button>
-                <button class="nav-item" data-tab="library" onclick="Musica.nav('library-view', this)">
+                <button class="nav-item" onclick="Musica.nav('library-view', this)">
                     <span class="material-symbols-rounded">library_music</span>
                     <span>Library</span>
                 </button>
@@ -37,7 +42,7 @@
                 <div class="search-header glass-panel">
                     <div class="search-bar">
                         <span class="material-symbols-rounded">search</span>
-                        <input type="text" id="search-input" placeholder="Search for songs or artists..." onkeypress="if(event.key === 'Enter') Musica.search()"/>
+                        <input type="text" id="search-input" placeholder="Search for songs..." onkeypress="if(event.key === 'Enter') Musica.search()"/>
                         <button onclick="Musica.search()" class="icon-btn">
                             <span class="material-symbols-rounded">arrow_forward</span>
                         </button>
@@ -55,52 +60,50 @@
                 <div class="library-header">
                     <div>
                         <h1 class="page-title">Library</h1>
-                        <p class="subtitle">Your saved collections.</p>
+                        <p class="subtitle">Your saved collections</p>
                     </div>
                     <button class="primary-btn" onclick="Library.createPlaylist()">
                         <span class="material-symbols-rounded">add</span> New Playlist
                     </button>
                 </div>
-                
-                <div class="playlists-container">
-                    <h3>Your Playlists</h3>
-                    <div id="playlists-grid" class="playlists-grid"></div>
-                </div>
-
+                <div id="playlists-grid" class="playlists-grid"></div>
                 <h3 class="section-heading">Liked Songs</h3>
                 <div id="library-results" class="results-grid"></div>
             </section>
         </main>
 
         <div class="player-bar glass-panel hidden" id="player-bar">
-            <div id="youtube-player" style="display: none;"></div>
+            <div id="youtube-player"></div>
             
             <div class="now-playing">
                 <img id="np-thumbnail" src="" class="np-thumb" />
                 <div class="np-info">
-                    <h4 id="np-title">Not Playing</h4>
+                    <h4 id="np-title">Ready</h4>
                     <p id="np-artist">-</p>
                 </div>
             </div>
 
-            <div class="player-controls">
-                <button class="icon-btn" onclick="Musica.togglePlay()">
-                    <span class="material-symbols-rounded" id="play-pause-icon" style="font-size: 40px;">play_arrow</span>
-                </button>
+            <div class="player-center">
+                <div class="player-controls">
+                    <button class="icon-btn play-btn" onclick="Musica.togglePlay()">
+                        <span class="material-symbols-rounded" id="play-pause-icon">play_arrow</span>
+                    </button>
+                </div>
+                <div class="progress-container">
+                    <span id="time-current">0:00</span>
+                    <input type="range" id="progress-bar" value="0" min="0" max="100">
+                    <span id="time-total">0:00</span>
+                </div>
             </div>
 
             <div class="player-actions">
                 <button class="icon-btn" onclick="Library.saveToLiked()">
                     <span class="material-symbols-rounded">favorite_border</span>
                 </button>
-                <button class="icon-btn" onclick="Library.addToPlaylist()">
-                    <span class="material-symbols-rounded">playlist_add</span>
-                </button>
             </div>
         </div>
     </div>
     
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="app.js"></script>
 </body>
 </html>
