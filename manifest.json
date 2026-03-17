@@ -1,8 +1,8 @@
 {
-  "name": "Musica",
+  "name": "Musica Premium",
   "short_name": "Musica",
   "description": "Liquid Glass Ad-Free Music Player",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
