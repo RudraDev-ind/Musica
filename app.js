@@ -190,6 +190,48 @@ const Auth = {
     }
 };
 
+
+const Library = {
+    init() {
+        this.renderLiked(); // Load saved songs on startup
+    },
+
+    // CREATE: Simple prompt-based playlist creation
+    createPlaylist() {
+        const pName = prompt("Enter Playlist Name:");
+        if (!pName) return;
+        
+        let playlists = JSON.parse(localStorage.getItem('musica_playlists')) || {};
+        if (playlists[pName]) return alert("Playlist already exists!");
+        
+        playlists[pName] = [];
+        localStorage.setItem('musica_playlists', JSON.stringify(playlists));
+        alert(`Playlist "${pName}" created!`);
+    },
+
+    // LIST: Render the 'Liked' or 'Library' section
+    renderLiked() {
+        const container = document.getElementById('library-content');
+        const liked = JSON.parse(localStorage.getItem('musica_liked')) || [];
+        
+        if (liked.length === 0) {
+            container.innerHTML = "<p style='padding:20px; opacity:0.5;'>No liked songs yet.</p>";
+            return;
+        }
+
+        container.innerHTML = liked.map(s => `
+            <div class="song-item" onclick="Musica.play('${s.id}', '${s.title.replace(/'/g,"")}', '${s.artist.replace(/'/g,"")}', '${s.thumb}')">
+                <img src="${s.thumb}" class="song-thumb">
+                <div class="song-meta">
+                    <h4>${s.title}</h4>
+                    <p>${s.artist}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+};
+
+
 // --- 5. ADMIN & KEYS ---
 const Admin = {
     globalKey: "AIzaSyAIaF7sqNwjAUud3OBoK_5HnRA7gP-Fd1A",
