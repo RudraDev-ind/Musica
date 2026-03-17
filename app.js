@@ -109,22 +109,46 @@ const Musica = {
         `).join('');
     },
 
-    async play(id, title, artist, thumb) {
-        this.currentSong = { id, title, artist, thumb };
-        document.getElementById('mini-player').classList.add('visible');
-        document.querySelectorAll('[id$="-title"]').forEach(el => el.innerText = title);
-        document.querySelectorAll('[id$="-artist"]').forEach(el => el.innerText = artist);
-        document.querySelectorAll('[id$="-art"]').forEach(el => el.src = thumb);
+    aasync play(id, title, artist, thumb) {
+    this.currentSong = { id, title, artist, thumb };
+    
+    // UI Updates
+    document.getElementById('mini-player').classList.add('visible');
+    document.querySelectorAll('[id$="-title"]').forEach(el => el.innerText = title);
+    document.querySelectorAll('[id$="-artist"]').forEach(el => el.innerText = artist);
+    document.querySelectorAll('[id$="-art"]').forEach(el => el.src = thumb);
 
+    // List of reliable mirrors
+    const mirrors = [
+        "https://pipedapi.in.projectsegfau.lt",
+        "https://pipedapi.kavin.rocks",
+        "https://api.piped.victr.me",
+        "https://piped-api.lunar.icu"
+    ];
+
+    for (let mirror of mirrors) {
         try {
-            const res = await fetch(`${INDIAN_MIRROR}/streams/${id}`);
+            console.log(`Trying server: ${mirror}`);
+            const res = await fetch(`${mirror}/streams/${id}`);
+            if (!res.ok) continue; // Try next mirror if this one fails
+
             const data = await res.json();
-            const stream = data.audioStreams.find(s => s.format === 'M4A' || s.bitrate > 120000) || data.audioStreams[0];
-            this.audio.src = stream.url;
-            this.audio.load();
-            this.audio.play().catch(() => console.log("User interaction required for play."));
-        } catch (e) { alert("Playback error. Try again."); }
-    },
+            const stream = data.audioStreams.find(s => s.format === 'M4A' || s.bitrate > 100000) || data.audioStreams[0];
+
+            if (stream && stream.url) {
+                this.audio.src = stream.url;
+                this.audio.load();
+                await this.audio.play();
+                return; // SUCCESS! Exit the loop
+            }
+        } catch (e) {
+            console.warn(`Server ${mirror} failed, trying next...`);
+        }
+    }
+
+    alert("All music servers are currently busy. Please try again in a few minutes.");
+},
+
 
     togglePlay() {
         if (this.audio.paused) this.audio.play();
