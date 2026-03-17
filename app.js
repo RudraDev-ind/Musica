@@ -200,4 +200,13 @@ const Visualizer = {
 
 // Start the Application
 window.onload = () => Musica.init();
+// Register Service Worker for PWA / Android Stability
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Musica Service Worker Registered'))
+      .catch(err => console.log('Service Worker Error', err));
+  });
+}
+
 
