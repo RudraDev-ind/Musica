@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLSS Music</title>
+    <title>Musica - Premium Streaming</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
@@ -13,7 +13,7 @@
         <nav class="glass-nav">
             <div class="nav-brand">
                 <span class="material-symbols-rounded">graphic_eq</span>
-                <h2>GLSS</h2>
+                <h2>MUSICA</h2>
             </div>
             <div class="nav-items">
                 <button class="nav-item" data-tab="search" onclick="Musica.nav('search-view', this)">
@@ -54,7 +54,7 @@
                 <div class="library-header">
                     <div>
                         <h1 class="page-title">Library</h1>
-                        <p class="subtitle">Your saved music.</p>
+                        <p class="subtitle">Your saved collections.</p>
                     </div>
                     <button class="primary-btn" onclick="Library.createPlaylist()">
                         <span class="material-symbols-rounded">add</span> New Playlist
@@ -62,7 +62,7 @@
                 </div>
                 
                 <div class="playlists-container">
-                    <h3>Playlists</h3>
+                    <h3>Your Playlists</h3>
                     <div id="playlists-grid" class="playlists-grid"></div>
                 </div>
 
@@ -84,7 +84,7 @@
 
             <div class="player-controls">
                 <button class="icon-btn" onclick="Musica.togglePlay()">
-                    <span class="material-symbols-rounded" id="play-pause-icon">play_arrow</span>
+                    <span class="material-symbols-rounded" id="play-pause-icon" style="font-size: 40px;">play_arrow</span>
                 </button>
             </div>
 
