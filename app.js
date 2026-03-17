@@ -231,6 +231,20 @@ const Library = {
     }
 };
 
+// Add this inside your window.onload or as a standalone function
+const Profile = {
+    editName() {
+        const newName = prompt("Enter new display name:");
+        if (newName) {
+            document.getElementById('user-name').innerText = newName;
+            // You can also save this to Firebase/LocalStorage here
+        }
+    },
+    changeQuality() {
+        alert("Audio quality set to High (320kbps).");
+    }
+};
+
 
 // --- 5. ADMIN & KEYS ---
 const Admin = {
