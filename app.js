@@ -176,14 +176,23 @@ const Auth = {
             .catch(err => alert(err.message));
     },
 
-    showApp() {
+        showApp() {
         const user = auth.currentUser;
         if (user) {
+            // 1. Hide Login, Show App
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
-            document.getElementById('user-name').innerText = user.email.split('@')[0];
+            
+            // 2. Set the Username in Profile
+            const displayEmail = user.email.split('@')[0];
+            document.getElementById('user-name').innerText = displayEmail;
+            
+            // 3. Trigger Data Loading (IMPORTANT)
+            Musica.loadTrending(); 
+            Library.renderLiked();
         }
     },
+
 
     logout() {
         auth.signOut().then(() => location.reload());
