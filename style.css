@@ -1,0 +1,58 @@
+:root {
+    --glass: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.2);
+}
+
+body {
+    background: #050505;
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Liquid Blobs */
+.liquid-blob {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    filter: blur(50px);
+    border-radius: 50%;
+    z-index: -1;
+    animation: move 20s infinite alternate;
+}
+.blob-1 { background: #ff0055; top: -50px; left: -50px; }
+.blob-2 { background: #0084ff; bottom: -50px; right: -50px; animation-delay: -5s; }
+
+@keyframes move {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(100px, 150px) scale(1.2); }
+}
+
+/* Glass Viewport */
+.glass-viewport {
+    background: var(--glass);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--border);
+    height: 85vh;
+    margin: 10px;
+    border-radius: 30px;
+    padding: 20px;
+    transition: all 0.5s ease-in-out; /* Smooth transition between sections */
+}
+
+/* Navigation */
+.glass-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid var(--border);
+}
