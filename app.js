@@ -18,8 +18,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// Stable 2026 API Instance
+// Stable 2026 API Instances
 const BASE_API = "https://pipedapi.leptons.xyz"; 
+const INDIAN_MIRROR = "https://pipedapi.in.projectsegfau.lt";
 
 const Musica = {
     audio: new Audio(),
@@ -74,26 +75,25 @@ const Musica = {
     },
 
     async loadTrending() {
-    const region = document.getElementById('region-selector').value || 'IN';
-    const listContainer = document.getElementById('trending-list');
-    listContainer.innerHTML = "<p style='padding:20px; opacity:0.5;'>Loading trends...</p>";
+        const region = document.getElementById('region-selector').value || 'IN';
+        const listContainer = document.getElementById('trending-list');
+        if (!listContainer) return;
+        listContainer.innerHTML = "<p style='padding:20px; opacity:0.5;'>Loading trends...</p>";
 
-    try {
-        // Using the Indian mirror for better reliability
-        const res = await fetch(`https://pipedapi.in.projectsegfau.lt/trending?region=${region}`);
-        const data = await res.json();
-        const songs = data.filter(i => i.type === 'stream').slice(0, 20).map(s => ({
-            id: s.url.split('=')[1],
-            title: s.title,
-            artist: s.uploaderName,
-            thumb: s.thumbnail
-        }));
-        this.renderSongs(songs, 'trending-list');
-    } catch(e) { 
-        listContainer.innerHTML = "<p style='padding:20px;'>Trending temporarily unavailable. Try another region.</p>";
-    }
-},
-
+        try {
+            const res = await fetch(`${INDIAN_MIRROR}/trending?region=${region}`);
+            const data = await res.json();
+            const songs = data.filter(i => i.type === 'stream').slice(0, 20).map(s => ({
+                id: s.url.split('=')[1],
+                title: s.title,
+                artist: s.uploaderName,
+                thumb: s.thumbnail
+            }));
+            this.renderSongs(songs, 'trending-list');
+        } catch(e) { 
+            listContainer.innerHTML = "<p style='padding:20px;'>Trending temporarily unavailable.</p>";
+        }
+    },
 
     renderSongs(songs, containerId) {
         const container = document.getElementById(containerId);
@@ -115,11 +115,14 @@ const Musica = {
         document.querySelectorAll('[id$="-artist"]').forEach(el => el.innerText = artist);
         document.querySelectorAll('[id$="-art"]').forEach(el => el.src = thumb);
 
-        const res = await fetch(`${BASE_API}/streams/${id}`);
-        const data = await res.json();
-        const stream = data.audioStreams.find(s => s.format === 'M4A' || s.bitrate > 120000);
-        this.audio.src = stream.url;
-        this.audio.play();
+        try {
+            const res = await fetch(`${INDIAN_MIRROR}/streams/${id}`);
+            const data = await res.json();
+            const stream = data.audioStreams.find(s => s.format === 'M4A' || s.bitrate > 120000) || data.audioStreams[0];
+            this.audio.src = stream.url;
+            this.audio.load();
+            this.audio.play().catch(() => alert("Tap Play to start music!"));
+        } catch (e) { alert("Playback error. Try again."); }
     },
 
     togglePlay() {
@@ -152,7 +155,6 @@ const Auth = {
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
         if (!email || !pass) return alert("Please fill all fields");
-        
         auth.createUserWithEmailAndPassword(email, pass)
             .then(() => { alert("Account Created!"); this.showApp(); })
             .catch(err => alert(err.message));
@@ -162,7 +164,6 @@ const Auth = {
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
         if (!email || !pass) return alert("Enter email and password");
-
         auth.signInWithEmailAndPassword(email, pass)
             .then(() => this.showApp())
             .catch(err => alert(err.message));
@@ -176,23 +177,16 @@ const Auth = {
             .catch(err => alert(err.message));
     },
 
-        showApp() {
+    showApp() {
         const user = auth.currentUser;
         if (user) {
-            // 1. Hide Login, Show App
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
-            
-            // 2. Set the Username in Profile
-            const displayEmail = user.email.split('@')[0];
-            document.getElementById('user-name').innerText = displayEmail;
-            
-            // 3. Trigger Data Loading (IMPORTANT)
+            document.getElementById('user-name').innerText = user.email.split('@')[0];
             Musica.loadTrending(); 
             Library.renderLiked();
         }
     },
-
 
     logout() {
         auth.signOut().then(() => location.reload());
@@ -201,56 +195,56 @@ const Auth = {
 
 const Library = {
     init() {
-        this.renderLiked(); // Loads liked songs when app starts
+        this.renderLiked(); 
     },
 
-    // 1. LIKE LOGIC (Triggered by the Heart button in Full Player)
     toggleLike() {
         if (!Musica.currentSong) return alert("Play a song first!");
-        
         let liked = JSON.parse(localStorage.getItem('musica_liked')) || [];
         const index = liked.findIndex(s => s.id === Musica.currentSong.id);
-
         if (index === -1) {
             liked.push(Musica.currentSong);
-            alert("Added to Liked Songs ❤️");
+            alert("Added to Liked ❤️");
             document.getElementById('like-btn').innerText = "❤️";
         } else {
             liked.splice(index, 1);
-            alert("Removed from Liked Songs");
+            alert("Removed from Liked");
             document.getElementById('like-btn').innerText = "♡";
         }
-
         localStorage.setItem('musica_liked', JSON.stringify(liked));
         this.renderLiked(); 
     },
 
-    // 2. CREATE PLAYLIST: Prompt for name and save to storage
     createPlaylist() {
         const pName = prompt("Enter Playlist Name:");
         if (!pName || pName.trim() === "") return;
-        
         let playlists = JSON.parse(localStorage.getItem('musica_playlists')) || {};
-        if (playlists[pName]) return alert("This playlist already exists!");
-        
-        playlists[pName] = []; // Initialize empty list
+        if (playlists[pName]) return alert("Playlist already exists!");
+        playlists[pName] = []; 
         localStorage.setItem('musica_playlists', JSON.stringify(playlists));
         alert(`Playlist "${pName}" created!`);
-        this.renderPlaylists(); // Refresh display
     },
 
-    // 3. RENDER LIKED: Displays songs in the Library section
+    addToPlaylist() {
+        if (!Musica.currentSong) return alert("No song is playing!");
+        const pName = prompt("Enter Playlist Name to add to:");
+        if (!pName) return;
+        let playlists = JSON.parse(localStorage.getItem('musica_playlists')) || {};
+        if (!playlists[pName]) playlists[pName] = [];
+        if (playlists[pName].find(s => s.id === Musica.currentSong.id)) return alert("Already in playlist!");
+        playlists[pName].push(Musica.currentSong);
+        localStorage.setItem('musica_playlists', JSON.stringify(playlists));
+        alert(`Saved to ${pName}!`);
+    },
+
     renderLiked() {
         const container = document.getElementById('library-content');
         if (!container) return;
-
         const liked = JSON.parse(localStorage.getItem('musica_liked')) || [];
-        
         if (liked.length === 0) {
             container.innerHTML = "<p style='padding:20px; text-align:center; opacity:0.5;'>No liked songs yet.</p>";
             return;
         }
-
         container.innerHTML = liked.map(s => `
             <div class="song-item" onclick="Musica.play('${s.id}', '${s.title.replace(/'/g,"")}', '${s.artist.replace(/'/g,"")}', '${s.thumb}')">
                 <img src="${s.thumb}" class="song-thumb">
@@ -263,22 +257,16 @@ const Library = {
     }
 };
 
-// Add this inside your window.onload or as a standalone function
 const Profile = {
     editName() {
         const newName = prompt("Enter new display name:");
-        if (newName) {
-            document.getElementById('user-name').innerText = newName;
-            // You can also save this to Firebase/LocalStorage here
-        }
+        if (newName) document.getElementById('user-name').innerText = newName;
     },
     changeQuality() {
         alert("Audio quality set to High (320kbps).");
     }
 };
 
-
-// --- 5. ADMIN & KEYS ---
 const Admin = {
     globalKey: "AIzaSyAIaF7sqNwjAUud3OBoK_5HnRA7gP-Fd1A",
     saveKey() {
@@ -294,14 +282,6 @@ const Admin = {
 // --- START APP ---
 window.onload = () => {
     Musica.init();
-    // This line was missing! It connects the Library logic on startup.
     Library.init(); 
-
-    auth.onAuthStateChanged(user => { 
-        if (user) {
-            Auth.showApp(); 
-            // Also refresh trending when a user logs in to ensure it's fresh
-            Musica.loadTrending(); 
-        }
-    });
+    auth.onAuthStateChanged(user => { if (user) Auth.showApp(); });
 };
