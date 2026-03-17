@@ -150,12 +150,43 @@ const Musica = {
 // --- 4. GLOBAL AUTH (FIREBASE) ---
 const Auth = {
     register() {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
+
+        // Validation: Stops the Firebase error if fields are empty
+        if (!email || !pass) {
+            alert("Please enter both email and password before clicking Create Account.");
+            return; 
+        }
+
+        if (pass.length < 6) {
+            alert("Password must be at least 6 characters.");
+            return;
+        }
+
         auth.createUserWithEmailAndPassword(email, pass)
-            .then(() => { alert("Account Created!"); this.showApp(); })
+            .then(() => { 
+                alert("Success! Your account is ready."); 
+                this.showApp(); 
+            })
             .catch(err => alert(err.message));
     },
+
+    login() {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
+
+        if (!email || !pass) {
+            alert("Please enter your email and password to login.");
+            return;
+        }
+
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(() => this.showApp())
+            .catch(err => alert(err.message));
+    },
+    // ... keep showApp() and logout() as they are
+
 
     login() {
         const email = document.getElementById('email').value;
