@@ -262,5 +262,14 @@ const Admin = {
 // --- START APP ---
 window.onload = () => {
     Musica.init();
-    auth.onAuthStateChanged(user => { if (user) Auth.showApp(); });
+    // This line was missing! It connects the Library logic on startup.
+    Library.init(); 
+
+    auth.onAuthStateChanged(user => { 
+        if (user) {
+            Auth.showApp(); 
+            // Also refresh trending when a user logs in to ensure it's fresh
+            Musica.loadTrending(); 
+        }
+    });
 };
