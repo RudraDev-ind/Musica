@@ -74,19 +74,26 @@ const Musica = {
     },
 
     async loadTrending() {
-        const region = document.getElementById('region-selector').value || 'IN';
-        try {
-            const res = await fetch(`${BASE_API}/trending?region=${region}`);
-            const data = await res.json();
-            const songs = data.filter(i => i.type === 'stream').slice(0, 15).map(s => ({
-                id: s.url.split('=')[1],
-                title: s.title,
-                artist: s.uploaderName,
-                thumb: s.thumbnail
-            }));
-            this.renderSongs(songs, 'trending-list');
-        } catch(e) { console.error("Trending failed", e); }
-    },
+    const region = document.getElementById('region-selector').value || 'IN';
+    const listContainer = document.getElementById('trending-list');
+    listContainer.innerHTML = "<p style='padding:20px; opacity:0.5;'>Loading trends...</p>";
+
+    try {
+        // Using the Indian mirror for better reliability
+        const res = await fetch(`https://pipedapi.in.projectsegfau.lt/trending?region=${region}`);
+        const data = await res.json();
+        const songs = data.filter(i => i.type === 'stream').slice(0, 20).map(s => ({
+            id: s.url.split('=')[1],
+            title: s.title,
+            artist: s.uploaderName,
+            thumb: s.thumbnail
+        }));
+        this.renderSongs(songs, 'trending-list');
+    } catch(e) { 
+        listContainer.innerHTML = "<p style='padding:20px;'>Trending temporarily unavailable. Try another region.</p>";
+    }
+},
+
 
     renderSongs(songs, containerId) {
         const container = document.getElementById(containerId);
