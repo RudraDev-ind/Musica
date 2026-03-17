@@ -29,12 +29,13 @@ const Musica = {
 
     init() {
         this.audio.crossOrigin = "anonymous";
-        this.loadTrending();
-
+        
+        // Audio Event Listeners
         this.audio.onplay = () => { this.isPlaying = true; this.updateUI(); };
         this.audio.onpause = () => { this.isPlaying = false; this.updateUI(); };
         this.audio.onended = () => { this.next(); };
 
+        // Lock Screen Controls
         if ('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
             navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
@@ -121,7 +122,7 @@ const Musica = {
             const stream = data.audioStreams.find(s => s.format === 'M4A' || s.bitrate > 120000) || data.audioStreams[0];
             this.audio.src = stream.url;
             this.audio.load();
-            this.audio.play().catch(() => alert("Tap Play to start music!"));
+            this.audio.play().catch(() => console.log("User interaction required for play."));
         } catch (e) { alert("Playback error. Try again."); }
     },
 
@@ -223,6 +224,7 @@ const Library = {
         playlists[pName] = []; 
         localStorage.setItem('musica_playlists', JSON.stringify(playlists));
         alert(`Playlist "${pName}" created!`);
+        this.renderLiked();
     },
 
     addToPlaylist() {
@@ -235,25 +237,57 @@ const Library = {
         playlists[pName].push(Musica.currentSong);
         localStorage.setItem('musica_playlists', JSON.stringify(playlists));
         alert(`Saved to ${pName}!`);
+        this.renderLiked();
     },
 
     renderLiked() {
         const container = document.getElementById('library-content');
         if (!container) return;
+        
         const liked = JSON.parse(localStorage.getItem('musica_liked')) || [];
-        if (liked.length === 0) {
-            container.innerHTML = "<p style='padding:20px; text-align:center; opacity:0.5;'>No liked songs yet.</p>";
-            return;
-        }
-        container.innerHTML = liked.map(s => `
-            <div class="song-item" onclick="Musica.play('${s.id}', '${s.title.replace(/'/g,"")}', '${s.artist.replace(/'/g,"")}', '${s.thumb}')">
+        const playlists = JSON.parse(localStorage.getItem('musica_playlists')) || {};
+        
+        container.innerHTML = "";
+
+        // Render Playlists as folders
+        Object.keys(playlists).forEach(name => {
+            const folder = document.createElement('div');
+            folder.className = 'song-item';
+            folder.style.borderLeft = "4px solid #00d2ff";
+            folder.innerHTML = `
+                <div class="song-thumb" style="display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.1); font-size:1.5rem;">📂</div>
+                <div class="song-meta">
+                    <h4>${name}</h4>
+                    <p>${playlists[name].length} songs</p>
+                </div>
+            `;
+            folder.onclick = () => {
+                if(playlists[name].length > 0) {
+                    const s = playlists[name][0];
+                    Musica.play(s.id, s.title.replace(/'/g,""), s.artist.replace(/'/g,""), s.thumb);
+                } else alert("Playlist is empty!");
+            };
+            container.appendChild(folder);
+        });
+
+        // Render Individual Liked Songs
+        liked.forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'song-item';
+            item.innerHTML = `
                 <img src="${s.thumb}" class="song-thumb">
                 <div class="song-meta">
                     <h4>${s.title}</h4>
                     <p>${s.artist}</p>
                 </div>
-            </div>
-        `).join('');
+            `;
+            item.onclick = () => Musica.play(s.id, s.title.replace(/'/g,""), s.artist.replace(/'/g,""), s.thumb);
+            container.appendChild(item);
+        });
+
+        if (container.innerHTML === "") {
+            container.innerHTML = "<p style='padding:20px; text-align:center; opacity:0.5;'>Library is empty.</p>";
+        }
     }
 };
 
