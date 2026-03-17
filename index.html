@@ -2,218 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Musica | Ad-Free Streaming</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Musica | Premium Ad-Free</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <style>
-        :root {
-            --glass: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --accent: #00d2ff;
-            --bg-dark: #050505;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            background: var(--bg-dark);
-            color: white;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* --- Liquid Background Animation --- */
-        .liquid-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            filter: blur(60px);
-            background: radial-gradient(circle at 10% 20%, #3a0088 0%, transparent 40%),
-                        radial-gradient(circle at 90% 80%, #00d2ff 0%, transparent 40%),
-                        radial-gradient(circle at 50% 50%, #121212 0%, transparent 70%);
-            animation: liquidMove 15s infinite alternate ease-in-out;
-        }
-
-        @keyframes liquidMove {
-            0% { transform: scale(1) translate(0, 0); }
-            100% { transform: scale(1.1) translate(20px, 30px); }
-        }
-
-        /* --- App Container --- */
-        .app-shell {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            background: var(--glass);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-left: 1px solid var(--glass-border);
-            border-right: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* --- Content Sections --- */
-        .content-area { flex: 1; padding: 25px; overflow-y: auto; position: relative; padding-bottom: 160px; }
-        
-        .page-section {
-            display: none;
-            opacity: 0;
-            transform: scale(0.95);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .page-section.active {
-            display: block;
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        h1 { font-size: 2rem; margin-bottom: 20px; font-weight: 800; letter-spacing: -1px; }
-
-        .card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            border-radius: 24px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .card:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
-
-        /* --- Mini Player Pill --- */
-        .mini-player {
-            position: absolute;
-            bottom: 95px;
-            left: 5%;
-            width: 90%;
-            height: 65px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 35px;
-            border: 1px solid rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            transform: translateY(200%);
-            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-            z-index: 50;
-        }
-
-        .mini-player.visible { transform: translateY(0); }
-
-        .mini-info { display: flex; align-items: center; gap: 12px; }
-        .mini-art { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); animation: rotate 5s linear infinite; animation-play-state: paused; }
-        .mini-player.playing .mini-art { animation-play-state: running; }
-        
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* --- Full Player Overlay --- */
-        .full-player {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 5, 0.98);
-            backdrop-filter: blur(40px);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            padding: 40px 30px;
-            transform: translateY(100%);
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .full-player.open { transform: translateY(0); }
-
-        .full-art {
-            width: 100%;
-            aspect-ratio: 1/1;
-            border-radius: 30px;
-            background: linear-gradient(45deg, #3a0088, #00d2ff);
-            margin: 40px 0;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-        }
-
-        .full-controls { display: flex; justify-content: center; align-items: center; gap: 40px; margin-top: auto; }
-        .play-big { width: 85px; height: 85px; background: white; color: black; border-radius: 50%; border: none; font-size: 2rem; }
-
-        /* --- Bottom Nav --- */
-        .nav-bar {
-            height: 85px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.02);
-            border-top: 1px solid var(--glass-border);
-            z-index: 40;
-        }
-
-        .nav-item { font-size: 1.4rem; opacity: 0.4; transition: 0.3s; cursor: pointer; }
-        .nav-item.active { opacity: 1; color: var(--accent); transform: scale(1.1); }
-
-    </style>
+    <meta name="theme-color" content="#050505">
 </head>
 <body>
-
     <div class="liquid-bg"></div>
 
-    <div class="app-shell">
-        <div class="content-area">
-            
+    <div id="auth-overlay" class="auth-page">
+        <div class="auth-glass">
+            <div class="brand-logo">M</div>
+            <h1>Musica</h1>
+            <p>Your music, your vibe. Ad-free forever.</p>
+            <div class="auth-form">
+                <input type="email" id="email" placeholder="Email Address">
+                <input type="password" id="password" placeholder="Password (min 6 chars)">
+                <button class="primary-btn" onclick="Auth.login()">Enter Musica</button>
+            </div>
+            <button class="secondary-btn">New here? Create Account</button>
+        </div>
+    </div>
+
+    <div class="app-shell" id="main-app" style="display: none;">
+        
+        <header class="main-header">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search YouTube Music...">
+                <button onclick="Musica.search()">🔍</button>
+            </div>
+        </header>
+
+        <main class="content-area">
             <section id="trending" class="page-section">
-                <h1>Trending</h1>
-                <p style="margin-bottom: 20px; opacity: 0.6;">India | Worldwide</p>
-                <div class="card" onclick="Musica.play('dQw4w9WgXcQ', 'Never Gonna Give You Up', 'Rick Astley')">
-                    <h3>Trending Hit #1</h3>
-                    <p>Rick Astley</p>
+                <div class="section-header">
+                    <h1>Trending</h1>
+                    <select id="region-selector" onchange="Musica.loadTrending()">
+                        <option value="IN">India</option>
+                        <option value="US">USA</option>
+                        <option value="GB">UK</option>
+                    </select>
                 </div>
+                <div id="trending-list" class="song-list">
+                    </div>
             </section>
 
             <section id="home" class="page-section active">
-                <h1>Musica</h1>
-                <div class="card" onclick="Musica.play('jfKfPfyJRdk', 'Lofi Girl', 'ChilledCow')">
-                    <h3>Lofi Beats</h3>
-                    <p>Quick Pick from History</p>
+                <div id="home-default">
+                    <h1>Discover</h1>
+                    <div class="genre-grid">
+                        <div class="genre-card" onclick="document.getElementById('search-input').value='Bollywood Hits'; Musica.search()">Bollywood</div>
+                        <div class="genre-card" onclick="document.getElementById('search-input').value='Lofi Hip Hop'; Musica.search()">Lo-Fi</div>
+                        <div class="genre-card" onclick="document.getElementById('search-input').value='Indie Pop India'; Musica.search()">Indie</div>
+                        <div class="genre-card" onclick="document.getElementById('search-input').value='Punjabi Latest'; Musica.search()">Punjabi</div>
+                    </div>
                 </div>
-                <h3>Genres</h3>
-                <div style="display:flex; gap:10px; margin-top:15px;">
-                    <div class="card" style="flex:1">Pop</div>
-                    <div class="card" style="flex:1">Jazz</div>
+                <div id="search-results" style="display:none;">
+                    <div class="section-header">
+                        <h1>Results</h1>
+                        <button class="icon-btn" onclick="location.reload()">✕</button>
+                    </div>
+                    <div id="results-list" class="song-list"></div>
                 </div>
             </section>
 
             <section id="library" class="page-section">
-                <h1>Your Library</h1>
-                <div class="card">❤️ Liked Songs</div>
-                <div class="card">📁 Custom Playlist 1</div>
+                <h1>Library</h1>
+                <div class="library-grid">
+                    <div class="lib-card" onclick="Library.renderLiked()">
+                        <div class="lib-icon heart">❤️</div>
+                        <p>Liked</p>
+                    </div>
+                    <div class="lib-card" onclick="Library.createPlaylist()">
+                        <div class="lib-icon plus">＋</div>
+                        <p>New List</p>
+                    </div>
+                </div>
+                <div id="library-content" class="song-list">
+                    </div>
             </section>
 
             <section id="profile" class="page-section">
-                <h1>Profile</h1>
-                <div class="card">Sign in with Email</div>
-                <div class="card" style="background: transparent;">Settings</div>
-            </section>
+                <div class="profile-card">
+                    <div class="avatar-glow"></div>
+                    <h2 id="user-name">User</h2>
+                    <span class="badge">Student Premium</span>
+                </div>
 
-        </div>
+                <div class="admin-panel card">
+                    <h3>Developer Settings</h3>
+                    <p>Enter Global YT API Key</p>
+                    <div class="api-input-group">
+                        <input type="password" id="api-key-input" placeholder="Paste Key Here...">
+                        <button onclick="Admin.saveKey()">Save</button>
+                    </div>
+                    <small id="key-status" style="color: #00d2ff; display:none;">✓ Key Active</small>
+                </div>
+
+                <div class="menu-list">
+                    <div class="menu-item">Audio Quality: High</div>
+                    <div class="menu-item" onclick="Auth.logout()" style="color: #ff4d4d; border-top: 1px solid rgba(255,77,77,0.2);">Logout</div>
+                </div>
+            </section>
+        </main>
 
         <div id="mini-player" class="mini-player" onclick="Musica.toggleFull(true)">
-            <div class="mini-info">
-                <div class="mini-art"></div>
-                <div>
-                    <b id="m-title" style="font-size:0.9rem; display:block;">Not Playing</b>
-                    <small id="m-artist" style="opacity:0.6">Choose a song</small>
+            <div class="mini-main">
+                <img id="m-art" src="" alt="">
+                <div class="mini-text">
+                    <b id="m-title">Choose a track</b>
+                    <p id="m-artist">Musica Player</p>
                 </div>
             </div>
-            <button onclick="event.stopPropagation(); Musica.togglePlay();" style="background:none; border:none; color:white; font-size:1.5rem;">▶</button>
+            <button class="play-mini" onclick="event.stopPropagation(); Musica.togglePlay()" id="m-play-btn">▶</button>
         </div>
 
-        <nav class="nav-bar">
+        <nav class="bottom-nav">
             <div class="nav-item" onclick="Musica.nav('trending', this)">🔥</div>
             <div class="nav-item active" onclick="Musica.nav('home', this)">🏠</div>
             <div class="nav-item" onclick="Musica.nav('library', this)">📚</div>
@@ -221,88 +126,43 @@
         </nav>
 
         <div id="full-overlay" class="full-player">
-            <canvas id="visualizer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4;"></canvas>
-            <button onclick="Musica.toggleFull(false)" style="align-self:flex-start; background:none; border:none; color:white; font-size:1.5rem;">✕</button>
-            <div class="full-art"></div>
-            <div style="text-align:center">
-                <h1 id="f-title" style="margin:0">Song Title</h1>
-                <p id="f-artist" style="opacity:0.6">Artist Name</p>
+            <canvas id="visualizer"></canvas>
+            
+            <div class="full-header">
+                <button onclick="Musica.toggleFull(false)">✕</button>
+                <span>Now Playing</span>
+                <button onclick="Library.addToPlaylist()">＋</button>
             </div>
-            <div class="full-controls">
-                <button style="background:none; border:none; color:white; font-size:2rem;">⏮</button>
-                <button class="play-big" onclick="Musica.togglePlay()">▶</button>
-                <button style="background:none; border:none; color:white; font-size:2rem;">⏭</button>
+
+            <div class="full-body">
+                <div class="art-container">
+                    <img id="f-art" src="" alt="">
+                </div>
+                <div class="song-info">
+                    <h1 id="f-title">Song Title</h1>
+                    <p id="f-artist">Artist Name</p>
+                </div>
+                
+                <div class="main-controls">
+                    <button class="side-btn" onclick="Library.toggleLike()" id="like-btn">♡</button>
+                    <button class="skip-btn" onclick="Musica.prev()">⏮</button>
+                    <button class="play-big" onclick="Musica.togglePlay()" id="f-play-btn">▶</button>
+                    <button class="skip-btn" onclick="Musica.next()">⏭</button>
+                    <button class="side-btn">🔀</button>
+                </div>
             </div>
         </div>
+
+        <div id="playlist-modal" class="modal-overlay" style="display:none;">
+            <div class="modal-glass">
+                <h3>Save to...</h3>
+                <div id="modal-list" class="modal-list"></div>
+                <button class="close-modal" onclick="Library.closeModal()">Close</button>
+            </div>
+        </div>
+
     </div>
 
-    <script>
-        const Musica = {
-            audio: new Audio(),
-            isPlaying: false,
-
-            init() {
-                this.audio.addEventListener('ended', () => this.next());
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
-                    navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
-                }
-            },
-
-            nav(pageId, el) {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                el.classList.add('active');
-                
-                document.querySelectorAll('.page-section').forEach(s => {
-                    s.classList.remove('active');
-                    if(s.id === pageId) setTimeout(() => s.classList.add('active'), 50);
-                });
-            },
-
-            async play(id, title, artist) {
-                const mini = document.getElementById('mini-player');
-                mini.classList.add('visible');
-                
-                document.getElementById('m-title').innerText = title;
-                document.getElementById('m-artist').innerText = artist;
-                document.getElementById('f-title').innerText = title;
-                document.getElementById('f-artist').innerText = artist;
-
-                try {
-                    // Ad-free streaming proxy
-                    const res = await fetch(`https://pipedapi.kavin.rocks/streams/${id}`);
-                    const data = await res.json();
-                    const stream = data.audioStreams.find(s => s.format === 'M4A');
-                    
-                    this.audio.src = stream.url;
-                    this.audio.play();
-                    this.isPlaying = true;
-                    this.updateUI();
-                    
-                    if ('mediaSession' in navigator) {
-                        navigator.mediaSession.metadata = new MediaMetadata({ title, artist });
-                    }
-                } catch (e) { alert("Stream currently unavailable."); }
-            },
-
-            togglePlay() {
-                if(this.audio.paused) { this.audio.play(); this.isPlaying = true; }
-                else { this.audio.pause(); this.isPlaying = false; }
-                this.updateUI();
-            },
-
-            updateUI() {
-                const btns = [document.querySelector('.mini-player button'), document.querySelector('.play-big')];
-                btns.forEach(b => b.innerText = this.isPlaying ? '⏸' : '▶');
-                document.getElementById('mini-player').classList.toggle('playing', this.isPlaying);
-            },
-
-            toggleFull(open) {
-                document.getElementById('full-overlay').classList.toggle('open', open);
-            }
-        };
-
-        window.onload = () => Musica.init();
     <script src="app.js"></script>
 </body>
 </html>
