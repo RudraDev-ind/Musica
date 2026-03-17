@@ -17,7 +17,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-
+const BASE_API = "https://pipedapi.leptons.xyz";
 const Musica = {
     audio: new Audio(),
     currentSong: null,
@@ -64,7 +64,7 @@ const Musica = {
             this.renderSongs(songs, 'results-list');
         } catch (e) {
             // Fallback: Piped API
-            const res = await fetch(`https://pipedapi.kavin.rocks/search?q=${query}&filter=music_songs`);
+            const res = await fetch(`${BASE_API}/search?q=${query}&filter=music_songs`);
             const data = await res.json();
             const songs = data.items.map(s => ({
                 id: s.url.split('=')[1],
