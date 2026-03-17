@@ -2,7 +2,7 @@ const CACHE_NAME = 'musica-v1';
 const ASSETS = [
   '/',
   '/index.html',
-  '/styles.css',
+  '/style.css',
   '/app.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap'
 ];
