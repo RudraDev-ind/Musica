@@ -1,58 +1,232 @@
+/* --- Root Variables & Reset --- */
 :root {
-    --glass: rgba(255, 255, 255, 0.1);
-    --border: rgba(255, 255, 255, 0.2);
+    --glass: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --accent: #00d2ff;
+    --bg-dark: #050505;
+    --text-main: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.6);
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+    -webkit-tap-highlight-color: transparent; 
 }
 
 body {
-    background: #050505;
-    overflow: hidden;
+    background: var(--bg-dark);
+    color: var(--text-main);
     height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Liquid Blobs */
-.liquid-blob {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    filter: blur(50px);
-    border-radius: 50%;
+/* --- Liquid Background Animation --- */
+.liquid-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
     z-index: -1;
-    animation: move 20s infinite alternate;
-}
-.blob-1 { background: #ff0055; top: -50px; left: -50px; }
-.blob-2 { background: #0084ff; bottom: -50px; right: -50px; animation-delay: -5s; }
-
-@keyframes move {
-    from { transform: translate(0, 0) scale(1); }
-    to { transform: translate(100px, 150px) scale(1.2); }
+    filter: blur(60px);
+    background: radial-gradient(circle at 15% 25%, #3a0088 0%, transparent 45%),
+                radial-gradient(circle at 85% 75%, #00d2ff 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, #121212 0%, transparent 70%);
+    animation: liquidMove 20s infinite alternate ease-in-out;
 }
 
-/* Glass Viewport */
-.glass-viewport {
+@keyframes liquidMove {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.15) translate(30px, -20px); }
+}
+
+/* --- App Shell & Container --- */
+.app-shell {
+    width: 100%;
+    max-width: 450px;
+    height: 100vh;
     background: var(--glass);
+    backdrop-filter: blur(35px);
+    -webkit-backdrop-filter: blur(35px);
+    border-left: 1px solid var(--glass-border);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 100px rgba(0,0,0,0.5);
+}
+
+/* --- Content Sections --- */
+.content-area { 
+    flex: 1; 
+    padding: 30px 20px; 
+    overflow-y: auto; 
+    position: relative; 
+    padding-bottom: 170px; /* Space for Mini-Player + Nav */
+}
+
+/* Hide scrollbar for a clean look */
+.content-area::-webkit-scrollbar { display: none; }
+
+.page-section {
+    display: none;
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.page-section.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 25px; letter-spacing: -1.5px; }
+h3 { font-size: 1.1rem; margin: 20px 0 15px; opacity: 0.9; }
+
+/* --- Reusable Cards (Liquid Glass Style) --- */
+.card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    padding: 20px;
+    border-radius: 24px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.card:active { 
+    transform: scale(0.96); 
+    background: rgba(255, 255, 255, 0.08); 
+}
+
+.card h3 { margin: 0; font-size: 1rem; }
+.card p { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
+
+/* --- Mini Player Pill --- */
+.mini-player {
+    position: absolute;
+    bottom: 95px;
+    left: 5%;
+    width: 90%;
+    height: 68px;
+    background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    border: 1px solid var(--border);
-    height: 85vh;
-    margin: 10px;
-    border-radius: 30px;
-    padding: 20px;
-    transition: all 0.5s ease-in-out; /* Smooth transition between sections */
+    border-radius: 35px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    transform: translateY(200%); /* Initial hidden state */
+    transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+    z-index: 50;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
 }
 
-/* Navigation */
-.glass-nav {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    height: 70px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
+.mini-player.visible { transform: translateY(0); }
+
+.mini-info { display: flex; align-items: center; gap: 14px; }
+
+.mini-art { 
+    width: 44px; 
+    height: 44px; 
+    border-radius: 50%; 
+    background: linear-gradient(45deg, #3a0088, #00d2ff); 
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+}
+
+/* --- Full Player Overlay --- */
+.full-player {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 5, 5, 0.95);
+    backdrop-filter: blur(45px);
+    -webkit-backdrop-filter: blur(45px);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 50px 30px;
+    transform: translateY(100%);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.full-player.open { transform: translateY(0); }
+
+.full-art {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 32px;
+    background: linear-gradient(135deg, #3a0088, #00d2ff);
+    margin: 40px 0;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+}
+
+.full-meta { text-align: center; margin-bottom: 40px; }
+.full-meta h1 { margin: 0; font-size: 1.8rem; }
+.full-meta p { opacity: 0.6; font-size: 1.1rem; margin-top: 8px; }
+
+.full-controls { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 45px; 
+    margin-top: auto; 
+    padding-bottom: 40px;
+}
+
+.play-big { 
+    width: 85px; 
+    height: 85px; 
+    background: white; 
+    color: black; 
+    border-radius: 50%; 
+    border: none; 
+    font-size: 2.2rem; 
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(255,255,255,0.2);
+}
+
+.control-btn { background: none; border: none; color: white; font-size: 2rem; opacity: 0.8; cursor: pointer; }
+
+/* --- Bottom Navigation Bar --- */
+.nav-bar {
+    height: 85px;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--glass-border);
+    z-index: 40;
+}
+
+.nav-item { 
+    font-size: 1.5rem; 
+    opacity: 0.35; 
+    transition: all 0.3s ease; 
+    cursor: pointer; 
+}
+
+.nav-item.active { 
+    opacity: 1; 
+    color: var(--accent); 
+    transform: scale(1.15) translateY(-2px); 
+}
+
+/* Close button for full player */
+.close-btn {
+    align-self: flex-start;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
 }
