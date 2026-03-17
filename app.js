@@ -230,6 +230,7 @@ const Auth = {
 };
 
 const Admin = {
+    globalKey: "AIzaSyAIaF7sqNwjAUud3OBoK_5HnRA7gP-Fd1A"
     saveKey() {
         const key = document.getElementById('api-key-input').value;
         localStorage.setItem('musica_global_key', key);
