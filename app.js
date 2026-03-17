@@ -12,17 +12,14 @@ const Musica = {
     progressTimer: null,
 
     init() {
-    // 1. Register Service Worker for Background Play & PWA
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-            .then(() => console.log("Musica Background Service Active"))
-            .catch(err => console.error("Service Worker Error", err));
-    }
+        // 1. Register Service Worker for Background Play & PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Musica Background Service Active"))
+                .catch(err => console.error("Service Worker Error", err));
+        }
 
-    // 2. Initialize YouTube IFrame API (rest of your existing code...)
-    window.onYouTubeIframeAPIReady = () => {
-        // ... (rest of the code I gave you earlier)
-
+        // 2. Initialize YouTube IFrame API
         window.onYouTubeIframeAPIReady = () => {
             this.ytPlayer = new YT.Player('youtube-player', {
                 height: '0',
@@ -32,7 +29,8 @@ const Musica = {
                     'controls': 0,
                     'disablekb': 1,
                     'modestbranding': 1,
-                    'rel': 0
+                    'rel': 0,
+                    'origin': window.location.origin
                 },
                 events: {
                     'onReady': () => console.log("Musica Engine Ready"),
@@ -121,7 +119,7 @@ const Musica = {
         if (this.ytPlayer && this.ytPlayer.loadVideoById) {
             this.ytPlayer.loadVideoById(id);
             this.ytPlayer.playVideo();
-            this.updateMediaSession(); // Enable Lock Screen Controls
+            this.updateMediaSession();
         }
     },
 
@@ -144,7 +142,6 @@ const Musica = {
         }
     },
 
-    /* --- MEDIA SESSION API (Lock Screen Controls) --- */
     updateMediaSession() {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -159,9 +156,9 @@ const Musica = {
         }
     },
 
-    /* --- PROGRESS BAR LOGIC --- */
     setupProgressBar() {
         const progressBar = document.getElementById('progress-bar');
+        if(!progressBar) return;
         progressBar.addEventListener('input', (e) => {
             const newTime = (this.ytPlayer.getDuration() * e.target.value) / 100;
             this.ytPlayer.seekTo(newTime);
@@ -171,19 +168,24 @@ const Musica = {
     startProgressUpdate() {
         clearInterval(this.progressTimer);
         this.progressTimer = setInterval(() => {
-            if (this.ytPlayer && this.isPlaying) {
+            if (this.ytPlayer && this.isPlaying && this.ytPlayer.getCurrentTime) {
                 const current = this.ytPlayer.getCurrentTime();
                 const total = this.ytPlayer.getDuration();
                 const pct = (current / total) * 100;
                 
-                document.getElementById('progress-bar').value = pct;
-                document.getElementById('time-current').innerText = this.formatTime(current);
-                document.getElementById('time-total').innerText = this.formatTime(total);
+                const pb = document.getElementById('progress-bar');
+                const tc = document.getElementById('time-current');
+                const tt = document.getElementById('time-total');
+                
+                if(pb) pb.value = pct;
+                if(tc) tc.innerText = this.formatTime(current);
+                if(tt) tt.innerText = this.formatTime(total);
             }
         }, 1000);
     },
 
     formatTime(seconds) {
+        if(!seconds) return "0:00";
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -212,6 +214,8 @@ const Library = {
     renderLibrary() {
         const likedContainer = document.getElementById('library-results');
         const playlistContainer = document.getElementById('playlists-grid');
+        if(!likedContainer || !playlistContainer) return;
+
         const liked = JSON.parse(localStorage.getItem('musica_liked')) || [];
         const playlists = JSON.parse(localStorage.getItem('musica_playlists')) || {};
 
