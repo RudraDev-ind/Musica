@@ -199,32 +199,55 @@ const Auth = {
     }
 };
 
-
 const Library = {
     init() {
-        this.renderLiked(); // Load saved songs on startup
+        this.renderLiked(); // Loads liked songs when app starts
     },
 
-    // CREATE: Simple prompt-based playlist creation
+    // 1. LIKE LOGIC (Triggered by the Heart button in Full Player)
+    toggleLike() {
+        if (!Musica.currentSong) return alert("Play a song first!");
+        
+        let liked = JSON.parse(localStorage.getItem('musica_liked')) || [];
+        const index = liked.findIndex(s => s.id === Musica.currentSong.id);
+
+        if (index === -1) {
+            liked.push(Musica.currentSong);
+            alert("Added to Liked Songs ❤️");
+            document.getElementById('like-btn').innerText = "❤️";
+        } else {
+            liked.splice(index, 1);
+            alert("Removed from Liked Songs");
+            document.getElementById('like-btn').innerText = "♡";
+        }
+
+        localStorage.setItem('musica_liked', JSON.stringify(liked));
+        this.renderLiked(); 
+    },
+
+    // 2. CREATE PLAYLIST: Prompt for name and save to storage
     createPlaylist() {
         const pName = prompt("Enter Playlist Name:");
-        if (!pName) return;
+        if (!pName || pName.trim() === "") return;
         
         let playlists = JSON.parse(localStorage.getItem('musica_playlists')) || {};
-        if (playlists[pName]) return alert("Playlist already exists!");
+        if (playlists[pName]) return alert("This playlist already exists!");
         
-        playlists[pName] = [];
+        playlists[pName] = []; // Initialize empty list
         localStorage.setItem('musica_playlists', JSON.stringify(playlists));
         alert(`Playlist "${pName}" created!`);
+        this.renderPlaylists(); // Refresh display
     },
 
-    // LIST: Render the 'Liked' or 'Library' section
+    // 3. RENDER LIKED: Displays songs in the Library section
     renderLiked() {
         const container = document.getElementById('library-content');
+        if (!container) return;
+
         const liked = JSON.parse(localStorage.getItem('musica_liked')) || [];
         
         if (liked.length === 0) {
-            container.innerHTML = "<p style='padding:20px; opacity:0.5;'>No liked songs yet.</p>";
+            container.innerHTML = "<p style='padding:20px; text-align:center; opacity:0.5;'>No liked songs yet.</p>";
             return;
         }
 
