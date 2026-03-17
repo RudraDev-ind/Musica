@@ -1,39 +1,54 @@
 const CACHE_NAME = 'musica-v1';
-const ASSETS = [
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// 1. Install Service Worker and Cache Assets
+// Install Service Worker and cache core files
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      console.log('Musica: Caching shell assets');
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  self.skipWaiting();
 });
 
-// 2. Activate and Clean Up Old Caches
+// Activate and remove old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Musica: Clearing old cache');
+            return caches.delete(cache);
+          }
+        })
       );
     })
   );
+  self.clients.claim();
 });
 
-// 3. Fetch Strategy: Network First, Fallback to Cache
-// This ensures the streaming links (which are dynamic) don't get stuck in cache
+// Network-first strategy for dynamic content, cache-first for UI
 self.addEventListener('fetch', (event) => {
+  // We don't cache music streams or API calls to save space/memory
+  if (event.request.url.includes('pipedapi') || event.request.url.includes('googleapis')) {
+    return; 
+  }
+
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).catch(() => {
+        // Optional: return a fallback for images if offline
+      });
     })
   );
 });
-
