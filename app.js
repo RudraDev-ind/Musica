@@ -149,28 +149,82 @@ const Musica = {
 
 // --- 4. GLOBAL AUTH (FIREBASE) ---
 const Auth = {
+    // 1. REGISTER NEW ACCOUNT
     register() {
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
 
-        // Validation: Stops the Firebase error if fields are empty
         if (!email || !pass) {
-            alert("Please enter both email and password before clicking Create Account.");
-            return; 
+            alert("Please fill in both email and password fields.");
+            return;
         }
 
         if (pass.length < 6) {
-            alert("Password must be at least 6 characters.");
+            alert("Password must be at least 6 characters long.");
             return;
         }
 
         auth.createUserWithEmailAndPassword(email, pass)
-            .then(() => { 
-                alert("Success! Your account is ready."); 
-                this.showApp(); 
+            .then(() => {
+                alert("Account Created Successfully!");
+                this.showApp();
             })
-            .catch(err => alert(err.message));
+            .catch((error) => alert(error.message));
     },
+
+    // 2. LOGIN TO EXISTING ACCOUNT
+    login() {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
+
+        if (!email || !pass) {
+            alert("Please enter your email and password.");
+            return;
+        }
+
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(() => {
+                this.showApp();
+            })
+            .catch((error) => alert("Login Failed: " + error.message));
+    },
+
+    // 3. FORGOT PASSWORD (RESET)
+    resetPassword() {
+        const email = document.getElementById('email').value.trim();
+
+        if (!email) {
+            alert("Please enter your email address first to receive a reset link.");
+            return;
+        }
+
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                alert("Password reset link sent! Check your inbox (and spam folder).");
+            })
+            .catch((error) => alert("Error: " + error.message));
+    },
+
+    // 4. TRANSITION UI TO APP
+    showApp() {
+        const user = auth.currentUser;
+        if (user) {
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            // Sets name from email (e.g., rudra@gmail.com -> rudra)
+            const userName = user.email.split('@')[0];
+            document.getElementById('user-name').innerText = userName;
+        }
+    },
+
+    // 5. LOGOUT
+    logout() {
+        auth.signOut().then(() => {
+            location.reload();
+        });
+    }
+};
+
 
     login() {
         const email = document.getElementById('email').value.trim();
