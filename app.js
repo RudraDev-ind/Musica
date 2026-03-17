@@ -12,6 +12,17 @@ const Musica = {
     progressTimer: null,
 
     init() {
+    // 1. Register Service Worker for Background Play & PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(() => console.log("Musica Background Service Active"))
+            .catch(err => console.error("Service Worker Error", err));
+    }
+
+    // 2. Initialize YouTube IFrame API (rest of your existing code...)
+    window.onYouTubeIframeAPIReady = () => {
+        // ... (rest of the code I gave you earlier)
+
         window.onYouTubeIframeAPIReady = () => {
             this.ytPlayer = new YT.Player('youtube-player', {
                 height: '0',
