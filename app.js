@@ -17,6 +17,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+
 const BASE_API = "https://pipedapi.leptons.xyz";
 const Musica = {
     audio: new Audio(),
